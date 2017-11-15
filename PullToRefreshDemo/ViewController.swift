@@ -18,7 +18,12 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        self.title = "test"
+        if #available(iOS 11.0, *) {
+            self.navigationController?.navigationBar.prefersLargeTitles = true
+        } else {
+            // Fallback on earlier versions
+        }
         setupPullToRefresh()
     }
     
@@ -27,27 +32,18 @@ class ViewController: UIViewController {
     }
     
     @IBAction fileprivate func startRefreshing() {
-        tableView.startRefreshing(at: .top)
+        tableView.startRefreshing()
     }
 }
 
 private extension ViewController {
     
     func setupPullToRefresh() {
-        tableView.addPullToRefresh(PullToRefresh()) { [weak self] in
-            let delayTime = DispatchTime.now() + Double(Int64(2 * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)
+        tableView.addPullToRefresh(PullToRefresh(animation: "water_loader", height: 60.0), navigationController: self.navigationController) { [weak self] in
+            let delayTime = DispatchTime.now() + Double(Int64(8 * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)
             DispatchQueue.main.asyncAfter(deadline: delayTime) {
                 self?.dataSourceCount = PageSize
-                self?.tableView.endRefreshing(at: .top)
-            }
-        }
-        
-        tableView.addPullToRefresh(PullToRefresh(position: .bottom)) { [weak self] in
-            let delayTime = DispatchTime.now() + Double(Int64(2 * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)
-            DispatchQueue.main.asyncAfter(deadline: delayTime) {
-                self?.dataSourceCount += PageSize
-                self?.tableView.reloadData()
-                self?.tableView.endRefreshing(at: .bottom)
+                self?.tableView.endRefreshing()
             }
         }
     }

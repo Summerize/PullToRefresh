@@ -11,7 +11,6 @@ import UIKit
 import ObjectiveC
 
 private var topPullToRefreshKey: UInt8 = 0
-private var bottomPullToRefreshKey: UInt8 = 0
 
 public extension UIScrollView {
     
@@ -24,89 +23,58 @@ public extension UIScrollView {
         }
     }
     
-    fileprivate(set) var bottomPullToRefresh: PullToRefresh? {
-        get {
-            return objc_getAssociatedObject(self, &bottomPullToRefreshKey) as? PullToRefresh
-        }
-        set {
-            objc_setAssociatedObject(self, &bottomPullToRefreshKey, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
-        }
-    }
-    
     internal func defaultFrame(forPullToRefresh pullToRefresh: PullToRefresh) -> CGRect {
         let view = pullToRefresh.refreshView
         var originY: CGFloat
-        switch pullToRefresh.position {
-        case .top:
-            originY = -view.frame.size.height
-        case .bottom:
-            originY = contentSize.height
-        }
-        return CGRect(x: 0, y: originY, width: frame.width, height: view.frame.height)
+        originY = -view.frame.size.height
+        return CGRect(x: 0.0, y: originY, width: view.frame.width, height: view.frame.height)
     }
     
-    public func addPullToRefresh(_ pullToRefresh: PullToRefresh, action: @escaping () -> ()) {
+    internal func defaultiOS11Frame(forPullToRefresh pullToRefresh: PullToRefresh) -> CGRect {
+        let view = pullToRefresh.refreshView
+        return CGRect(x: 0.0, y: 10.0, width: view.frame.width, height: view.frame.height)
+    }
+    
+    public func addPullToRefresh(_ pullToRefresh: PullToRefresh, navigationController: UINavigationController?, action: @escaping () -> ()) {
         pullToRefresh.scrollView = self
         pullToRefresh.action = action
         
         let view = pullToRefresh.refreshView
         
-        switch pullToRefresh.position {
-        case .top:
-            removePullToRefresh(at: .top)
-            topPullToRefresh = pullToRefresh
-            
-        case .bottom:
-            removePullToRefresh(at: .bottom)
-            bottomPullToRefresh = pullToRefresh
+        removePullToRefresh()
+        topPullToRefresh = pullToRefresh
+
+        if #available(iOS 11, *) {
+            view.frame = defaultiOS11Frame(forPullToRefresh: pullToRefresh)
+            navigationController?.navigationBar.addSubview(view)
+            navigationController?.navigationBar.sendSubview(toBack: view)
         }
-        
-        view.frame = defaultFrame(forPullToRefresh: pullToRefresh)
-        
-        addSubview(view)
-        sendSubview(toBack: view)
+        else {
+            view.frame = defaultFrame(forPullToRefresh: pullToRefresh)
+            addSubview(view)
+            sendSubview(toBack: view)
+        }
     }
     
-    func removePullToRefresh(at position: Position) {
-        switch position {
-        case .top:
+    func removePullToRefresh() {
             topPullToRefresh?.refreshView.removeFromSuperview()
             topPullToRefresh = nil
-            
-        case .bottom:
-            bottomPullToRefresh?.refreshView.removeFromSuperview()
-            bottomPullToRefresh = nil
-        }
     }
     
     func removeAllPullToRefresh() {
-        removePullToRefresh(at: .top)
-        removePullToRefresh(at: .bottom)
+        removePullToRefresh()
     }
     
-    func startRefreshing(at position: Position) {
-        switch position {
-        case .top:
-            topPullToRefresh?.startRefreshing()
-            
-        case .bottom:
-            bottomPullToRefresh?.startRefreshing()
-        }
+    func startRefreshing() {
+        topPullToRefresh?.startRefreshing()
     }
     
-    func endRefreshing(at position: Position) {
-        switch position {
-        case .top:
-            topPullToRefresh?.endRefreshing()
-            
-        case .bottom:
-            bottomPullToRefresh?.endRefreshing()
-        }
+    func endRefreshing() {
+        topPullToRefresh?.endRefreshing()
     }
     
     func endAllRefreshing() {
-        endRefreshing(at: .top)
-        endRefreshing(at: .bottom)
+        endRefreshing()
     }
 }
 
@@ -144,13 +112,8 @@ extension UIScrollView {
         }
     }
     
-    internal func addAdjustedContentInsetsHandler(forPosition position: Position, handler: @escaping ((UIEdgeInsets) -> Void)) {
-        switch position {
-        case .top:
-            topPullToRefreshInsetsHandler = handler
-        case .bottom:
-            bottomPullToRefreshInsetsHandler = handler
-        }
+    internal func addAdjustedContentInsetsHandler(handler: @escaping ((UIEdgeInsets) -> Void)) {
+        topPullToRefreshInsetsHandler = handler
         if !isImplementationSwaped {
             swapAdjustedContentInsetDidChangeImplementation()
             isImplementationSwaped = true
@@ -167,13 +130,8 @@ extension UIScrollView {
         }
     }
     
-    internal func removeAdjustedContentInsetsHandler(forPosition position: Position) {
-        switch position {
-        case .top:
-            topPullToRefreshInsetsHandler = nil
-        case .bottom:
-            bottomPullToRefreshInsetsHandler = nil
-        }
+    internal func removeAdjustedContentInsetsHandler() {
+        topPullToRefreshInsetsHandler = nil
         if topPullToRefreshInsetsHandler == nil && bottomPullToRefreshInsetsHandler == nil {
             swapAdjustedContentInsetDidChangeImplementation()
             isImplementationSwaped = false

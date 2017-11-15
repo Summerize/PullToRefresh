@@ -119,7 +119,12 @@ extension PullToRefresh {
     
     override open func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if (context == &KVO.context && keyPath == KVO.ScrollViewPath.contentOffset && object as? UIScrollView == scrollView) {
-            refreshView.center.x = scrollView!.center.x
+            if #available(iOS 11, *) {
+                refreshView.frame.origin.x = scrollView!.frame.size.width - (refreshView.frame.size.width)
+            }
+            else {
+                refreshView.center.x = scrollView!.center.x
+            }
             var offset: CGFloat
             var topInsetY: CGFloat
             if #available(iOS 11, *) {
@@ -128,7 +133,7 @@ extension PullToRefresh {
                 topInsetY = scrollView!.contentInset.top
             }
             offset = previousScrollViewOffset.y + topInsetY
-
+            
             let refreshViewHeight = refreshView.frame.size.height
             
             switch offset {
@@ -140,6 +145,7 @@ extension PullToRefresh {
                 else {
                     state = .releasing(progress: -offset / refreshViewHeight)
                 }
+                
             case -1000...(-refreshViewHeight):
                 if state == .releasing(progress: 1) && scrollView?.isDragging == false {
                     state = .loading

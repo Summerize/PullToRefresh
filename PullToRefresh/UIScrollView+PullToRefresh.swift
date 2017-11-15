@@ -32,7 +32,7 @@ public extension UIScrollView {
     
     internal func defaultiOS11Frame(forPullToRefresh pullToRefresh: PullToRefresh) -> CGRect {
         let view = pullToRefresh.refreshView
-        return CGRect(x: 0.0, y: -10.0, width: view.frame.width, height: view.frame.height)
+        return CGRect(x: 0.0, y: 10.0, width: view.frame.width, height: view.frame.height)
     }
     
     public func addPullToRefresh(_ pullToRefresh: PullToRefresh, navigationController: UINavigationController?, action: @escaping () -> ()) {
@@ -144,4 +144,3 @@ extension UIScrollView {
         patchedAdjustedContentInsetDidChange()
     }
 }
-

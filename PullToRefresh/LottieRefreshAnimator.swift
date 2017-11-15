@@ -8,7 +8,6 @@
 
 import Lottie
 
-
 class LottieViewAnimator: RefreshViewAnimator {
     var animationShouldContinue = true
     fileprivate let refreshView: LOTAnimationView
@@ -20,13 +19,22 @@ class LottieViewAnimator: RefreshViewAnimator {
     func animate(_ state: State) {
         switch state {
         case .initial:
+            
             animationShouldContinue = false
             refreshView.stop()
-            UIView.animate(withDuration: 0.25, animations: {
+            UIView.animate(withDuration: 0.1, animations: {
                 self.refreshView.alpha = 0.0
             })
         case .releasing(let progress):
-            refreshView.alpha = 1.0
+            print(progress)
+            if (progress < 0.05) {
+                UIView.animate(withDuration: 0.1, animations: {
+                    self.refreshView.alpha = 0.0
+                })
+            }
+            else {
+                refreshView.alpha = 1.0
+            }
             refreshView.animationProgress = progress * 0.22
         case .loading:
             animationShouldContinue = true
@@ -43,3 +51,4 @@ class LottieViewAnimator: RefreshViewAnimator {
         }
     }
 }
+

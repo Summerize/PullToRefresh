@@ -134,8 +134,12 @@ extension PullToRefresh {
             switch offset {
             case 0 where (state != .loading): state = .initial
             case -refreshViewHeight...0 where (state != .loading && state != .finished):
-                state = .releasing(progress: -offset / refreshViewHeight)
-                
+                if scrollView?.isDragging == false {
+                    state = .releasing(progress: 0.0)
+                }
+                else {
+                    state = .releasing(progress: -offset / refreshViewHeight)
+                }
             case -1000...(-refreshViewHeight):
                 if state == .releasing(progress: 1) && scrollView?.isDragging == false {
                     state = .loading

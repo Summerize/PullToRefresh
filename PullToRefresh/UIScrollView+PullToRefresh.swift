@@ -32,7 +32,7 @@ public extension UIScrollView {
     
     internal func defaultiOS11Frame(forPullToRefresh pullToRefresh: PullToRefresh) -> CGRect {
         let view = pullToRefresh.refreshView
-        return CGRect(x: 0.0, y: 10.0, width: view.frame.width, height: view.frame.height)
+        return CGRect(x: 0.0, y: -10.0, width: view.frame.width, height: view.frame.height)
     }
     
     public func addPullToRefresh(_ pullToRefresh: PullToRefresh, navigationController: UINavigationController?, action: @escaping () -> ()) {
@@ -43,7 +43,7 @@ public extension UIScrollView {
         
         removePullToRefresh()
         topPullToRefresh = pullToRefresh
-
+        
         if #available(iOS 11, *) {
             view.frame = defaultiOS11Frame(forPullToRefresh: pullToRefresh)
             navigationController?.navigationBar.addSubview(view)
@@ -57,8 +57,8 @@ public extension UIScrollView {
     }
     
     func removePullToRefresh() {
-            topPullToRefresh?.refreshView.removeFromSuperview()
-            topPullToRefresh = nil
+        topPullToRefresh?.refreshView.removeFromSuperview()
+        topPullToRefresh = nil
     }
     
     func removeAllPullToRefresh() {
@@ -108,7 +108,7 @@ extension UIScrollView {
             return objc_getAssociatedObject(self, &implementationSwapedKey) as? Bool ?? false
         }
         set{
-             objc_setAssociatedObject(self, &implementationSwapedKey, newValue, .OBJC_ASSOCIATION_RETAIN)
+            objc_setAssociatedObject(self, &implementationSwapedKey, newValue, .OBJC_ASSOCIATION_RETAIN)
         }
     }
     
@@ -125,8 +125,8 @@ extension UIScrollView {
         let swizzledSelector = #selector(patchedAdjustedContentInsetDidChange)
         
         if let originalMethod = class_getInstanceMethod(UIScrollView.self, originalSelector),
-           let swizzledMethod = class_getInstanceMethod(UIScrollView.self, swizzledSelector) {
-           method_exchangeImplementations(originalMethod, swizzledMethod)
+            let swizzledMethod = class_getInstanceMethod(UIScrollView.self, swizzledSelector) {
+            method_exchangeImplementations(originalMethod, swizzledMethod)
         }
     }
     
@@ -144,3 +144,4 @@ extension UIScrollView {
         patchedAdjustedContentInsetDidChange()
     }
 }
+

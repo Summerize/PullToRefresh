@@ -284,18 +284,33 @@ private extension PullToRefresh {
     func bringRefreshViewToSuperview() {
         guard let scrollView = scrollView, let superView = scrollView.superview else { return }
         let frame = scrollView.convert(refreshView.frame, to: superView)
-        refreshView.removeFromSuperview()
-        superView.insertSubview(refreshView, aboveSubview: scrollView)
-        refreshView.center.x = scrollView.center.x
+        if #available(iOS 11, *) {
+            if let s = refreshView.superview {
+                refreshView.removeFromSuperview()
+                s.addSubview(refreshView)
+            }
+        }
+        else {
+            refreshView.removeFromSuperview()
+            superView.insertSubview(refreshView, aboveSubview: scrollView)
+            refreshView.center.x = scrollView.center.x
+        }
         refreshView.layoutSubviews()
     }
     
     func sendRefreshViewToScrollView() {
         refreshView.removeFromSuperview()
         guard let scrollView = scrollView else { return }
-        scrollView.addSubview(refreshView)
-        refreshView.frame = scrollView.defaultFrame(forPullToRefresh: self)
-        scrollView.sendSubview(toBack: refreshView)
+        if #available(iOS 11, *) {
+            if let s = refreshView.superview {
+                s.sendSubview(toBack: refreshView)
+            }
+        }
+        else {
+            scrollView.addSubview(refreshView)
+            refreshView.frame = scrollView.defaultFrame(forPullToRefresh: self)
+            scrollView.sendSubview(toBack: refreshView)
+        }
     }
     
 }

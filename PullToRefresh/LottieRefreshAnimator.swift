@@ -26,7 +26,6 @@ class LottieViewAnimator: RefreshViewAnimator {
                 self.refreshView.alpha = 0.0
             })
         case .releasing(let progress):
-            print(progress)
             if (progress < 0.05) {
                 UIView.animate(withDuration: 0.1, animations: {
                     self.refreshView.alpha = 0.0
